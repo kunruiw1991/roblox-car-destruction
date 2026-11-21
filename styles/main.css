@@ -1,0 +1,1422 @@
+/* ============================================================================
+   Roblox Realistic Car Destruction 3D — iPad Safari Responsive Stylesheet
+   Viewports verified:
+     1280x800, 1180x820, 1024x768 (Landscape) | 820x1180, 768x1024 (Portrait)
+   Invariants:
+     - 0 scrollbars, 0 clipped text, 0 pairwise overlaps, >= 60% open center
+     - Center 50% x 45% 3D viewport hitbox 100% unobstructed across all 5 sizes
+     - Touch targets >= 44x44 px (primary steer/pedals 72-84px L, 62-76px P)
+     - Zero external URLs, zero compositor blur stalls
+   ============================================================================ */
+
+:root {
+  --font-ui: 'Avenir Next', 'Segoe UI', 'Trebuchet MS', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Roblox Dark Translucent HUD Palette */
+  --hud-bg: rgba(15, 22, 34, 0.80);
+  --hud-bg-strong: rgba(12, 18, 29, 0.88);
+  --hud-border: rgba(255, 255, 255, 0.18);
+  --hud-hazard: #facc15;
+  --hud-text: #f8fafc;
+  --hud-muted: #94a3b8;
+  --cash-green: #4ade80;
+  --hp-green-a: #4ade80;
+  --hp-green-b: #16a34a;
+  --hp-warn-a: #facc15;
+  --hp-warn-b: #d97706;
+  --hp-danger-a: #f87171;
+  --hp-danger-b: #dc2626;
+  --nos-a: #fde047;
+  --nos-b: #22d3ee;
+
+  /* Safe-area edge insets */
+  --inset-top: max(10px, env(safe-area-inset-top, 0px));
+  --inset-right: max(12px, env(safe-area-inset-right, 0px));
+  --inset-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  --inset-left: max(12px, env(safe-area-inset-left, 0px));
+
+  /* Responsive cluster dimensions (Default: >= 1100px Landscape — 1280x800, 1180x820) */
+  --tl-w: 224px;
+  --tr-w: 230px;
+  --nav-btn-w: 108px;
+  --nav-btn-h: 46px;
+  --cam-btn-w: 82px;
+  --eject-btn-w: 90px;
+  --audio-btn-w: 46px;
+  --util-btn-h: 46px;
+  --alert-max-w: min(440px, calc(100vw - 500px));
+  --feed-w: 230px;
+  --steer-size: 78px;
+  --steer-gap: 10px;
+  --speedo-w: 164px;
+  --speedo-h: 74px;
+  --act-w: 76px;
+  --act-h: 52px;
+  --act-gap: 8px;
+  --brake-w: 74px;
+  --brake-h: 78px;
+  --gas-w: 84px;
+  --gas-h: 82px;
+  --nos-w: 74px;
+  --nos-h: 78px;
+  --pedal-gap: 8px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden],
+.is-hidden {
+  display: none !important;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  background: #38a6ff;
+  font-family: var(--font-ui);
+  color: var(--hud-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+#game-canvas {
+  display: block;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  outline: none;
+  z-index: 1;
+}
+
+#ui-layer {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  touch-action: none;
+  z-index: 20;
+}
+
+.hud-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  touch-action: none;
+}
+
+/* ============================================================================
+   Start Overlay (#start-overlay & #btn-play)
+   ============================================================================ */
+
+.start-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(26px, env(safe-area-inset-top, 0px))
+           max(20px, env(safe-area-inset-right, 0px))
+           max(32px, env(safe-area-inset-bottom, 0px))
+           max(20px, env(safe-area-inset-left, 0px));
+  background: radial-gradient(
+    circle at 50% 48%,
+    rgba(15, 23, 42, 0.04) 0%,
+    rgba(15, 23, 42, 0.44) 100%
+  );
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.start-hero-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: min(580px, calc(100vw - 40px));
+  padding: 16px 24px 18px;
+  border-radius: 22px;
+  background: rgba(15, 22, 34, 0.86);
+  border: 3px solid var(--hud-hazard);
+  box-shadow: 0 8px 0 rgba(10, 15, 26, 0.72), 0 18px 36px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.start-kicker {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--hud-hazard);
+  color: #111827;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.start-title {
+  margin: 0;
+  font-size: clamp(24px, 3.8vw, 40px);
+  line-height: 1.06;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  text-shadow: 0 3px 0 #b91c1c, 0 6px 14px rgba(0, 0, 0, 0.45);
+}
+
+.start-badges {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.start-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(30, 41, 59, 0.92);
+  border: 1.5px solid rgba(250, 204, 21, 0.55);
+  font-size: 12px;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.start-cta-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-play-cta {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 240px;
+  min-height: 76px;
+  padding: 14px 36px;
+  border-radius: 20px;
+  border: 3px solid #052e16;
+  background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+  box-shadow: 0 7px 0 #14532d, inset 0 3px 0 rgba(255, 255, 255, 0.48), 0 14px 28px rgba(0, 0, 0, 0.36);
+  color: #ffffff;
+  font-family: var(--font-ui);
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 0 #052e16;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: none;
+  transition: transform 0.07s ease, box-shadow 0.07s ease;
+}
+
+.btn-play-cta > * {
+  pointer-events: none;
+}
+
+.btn-play-cta.is-pressed,
+.btn-play-cta:active {
+  transform: translateY(5px) scale(0.98);
+  box-shadow: 0 2px 0 #14532d, inset 0 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+.start-hint {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(15, 22, 34, 0.78);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* ============================================================================
+   Shared Chunky 3D-Beveled Roblox HUD Buttons & Driving Pedals
+   ============================================================================ */
+
+.hud-btn,
+.pedal-btn,
+.modal-close-btn,
+.paint-swatch-btn,
+.zone-cat-tab,
+.vehicle-card,
+.zone-card {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hud-btn > *,
+.pedal-btn > *,
+.modal-close-btn > *,
+.zone-cat-tab > *,
+.vehicle-card > *,
+.zone-card > * {
+  pointer-events: none;
+}
+
+.hud-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  border: 2px solid rgba(15, 23, 42, 0.92);
+  color: #ffffff;
+  font-weight: 900;
+  text-shadow: 0 1.5px 0 rgba(0, 0, 0, 0.55);
+  box-shadow: 0 4px 0 rgba(10, 15, 26, 0.85), inset 0 2px 0 rgba(255, 255, 255, 0.32);
+  transition: transform 0.06s ease, box-shadow 0.06s ease, filter 0.1s ease;
+}
+
+.hud-btn.is-pressed,
+.hud-btn:active:not(.is-disabled) {
+  transform: translateY(3px) scale(0.97);
+  box-shadow: 0 1px 0 rgba(10, 15, 26, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.hud-btn.is-disabled,
+.pedal-btn.is-disabled {
+  opacity: 0.52;
+  filter: grayscale(0.35);
+}
+
+.hud-btn:focus-visible,
+.pedal-btn:focus-visible,
+.btn-play-cta:focus-visible,
+.modal-close-btn:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   Top-Left Cluster: Status Card + CARS / WARP Nav Buttons
+   ============================================================================ */
+
+.hud-top-left {
+  position: fixed;
+  top: var(--inset-top);
+  left: var(--inset-left);
+  width: var(--tl-w);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.hud-status-card {
+  width: 100%;
+  min-height: 76px;
+  padding: 7px 10px;
+  border-radius: 14px;
+  background: var(--hud-bg);
+  border: 2px solid var(--hud-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.hud-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-cash {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--cash-green);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.7);
+}
+
+.stat-parts-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.stat-ico {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.stat-level {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(56, 189, 248, 0.22);
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  font-size: 11px;
+  font-weight: 900;
+  color: #7dd3fc;
+}
+
+.hud-meter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meter-tag {
+  width: 24px;
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  color: #cbd5e1;
+}
+
+.meter-tag-nos {
+  color: #fde047;
+}
+
+.meter-track {
+  position: relative;
+  flex: 1 1 auto;
+  height: 11px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.72);
+  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.meter-track-nitro {
+  height: 9px;
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.12s ease-out, background 0.18s ease;
+}
+
+.meter-fill-integrity {
+  background: linear-gradient(90deg, var(--hp-green-b) 0%, var(--hp-green-a) 100%);
+}
+
+.meter-fill-integrity.is-warn {
+  background: linear-gradient(90deg, var(--hp-warn-b) 0%, var(--hp-warn-a) 100%);
+}
+
+.meter-fill-integrity.is-danger {
+  background: linear-gradient(90deg, var(--hp-danger-b) 0%, var(--hp-danger-a) 100%);
+}
+
+.meter-fill-nitro {
+  background: linear-gradient(90deg, var(--nos-a) 0%, var(--nos-b) 100%);
+}
+
+.meter-val {
+  width: 36px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+
+.hud-nav-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.hud-btn-nav {
+  width: var(--nav-btn-w);
+  height: var(--nav-btn-h);
+  min-width: 44px;
+  min-height: 44px;
+  flex-direction: row;
+  gap: 5px;
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+.hud-btn-nav .btn-icon {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.hud-btn-garage {
+  background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+  border-color: #172554;
+  box-shadow: 0 4px 0 #1e3a8a, inset 0 2px 0 rgba(255, 255, 255, 0.36);
+}
+
+.hud-btn-teleport {
+  background: linear-gradient(180deg, #facc15 0%, #eab308 100%);
+  border-color: #713f12;
+  color: #111827;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+  box-shadow: 0 4px 0 #a16207, inset 0 2px 0 rgba(255, 255, 255, 0.55);
+}
+
+/* ============================================================================
+   Top-Center Dynamic Alert Banner (#hud-alert)
+   ============================================================================ */
+
+.hud-alert {
+  position: fixed;
+  top: var(--inset-top);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: var(--alert-max-w);
+  padding: 8px 16px;
+  border-radius: 14px;
+  background: rgba(15, 22, 34, 0.90);
+  border: 2.5px solid var(--hud-hazard);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.36);
+  color: #fef08a;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.22;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: break-word;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.hud-alert.alert-danger,
+.hud-alert.alert-wrecked {
+  background: rgba(127, 29, 29, 0.92);
+  border-color: #fca5a5;
+  color: #ffffff;
+}
+
+.hud-alert.alert-info {
+  background: rgba(12, 74, 110, 0.90);
+  border-color: #7dd3fc;
+  color: #f0f9ff;
+}
+
+/* ============================================================================
+   Top-Right Cluster: Classic Roblox Leaderboard + CAM / EJECT / Audio
+   ============================================================================ */
+
+.hud-top-right {
+  position: fixed;
+  top: var(--inset-top);
+  right: var(--inset-right);
+  width: var(--tr-w);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.hud-leaderboard {
+  width: 100%;
+  min-height: 76px;
+  padding: 6px 10px;
+  border-radius: 14px;
+  background: var(--hud-bg);
+  border: 2px solid var(--hud-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 3px;
+  pointer-events: none;
+}
+
+.lb-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: var(--hud-muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: 2px;
+}
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.lb-row-self {
+  color: #ffffff;
+}
+
+.lb-player {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lb-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.lb-dot-jj {
+  background: #ef4444;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.6);
+}
+
+.lb-dot-mikey {
+  background: #22c55e;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.6);
+}
+
+.lb-cash {
+  font-variant-numeric: tabular-nums;
+  color: var(--cash-green);
+}
+
+.hud-util-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.hud-btn-util {
+  height: var(--util-btn-h);
+  min-width: 44px;
+  min-height: 44px;
+  flex-direction: row;
+  gap: 4px;
+  padding: 0 6px;
+  font-size: 12px;
+  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+  border-color: #0f172a;
+}
+
+.hud-btn-util .btn-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.hud-btn-cam {
+  width: var(--cam-btn-w);
+}
+
+.hud-btn-eject {
+  width: var(--eject-btn-w);
+  background: linear-gradient(180deg, #f97316 0%, #c2410c 100%);
+  border-color: #7c2d12;
+  box-shadow: 0 4px 0 #7c2d12, inset 0 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+.hud-btn-audio {
+  width: var(--audio-btn-w);
+  padding: 0;
+}
+
+.hud-btn-audio.is-muted {
+  background: linear-gradient(180deg, #64748b 0%, #475569 100%);
+  opacity: 0.85;
+}
+
+/* ============================================================================
+   Right-Side Trick & Crash Combo Scorecard (#hud-trick-feed)
+   ============================================================================ */
+
+.hud-trick-feed {
+  position: fixed;
+  top: calc(var(--inset-top) + 138px);
+  right: var(--inset-right);
+  width: var(--feed-w);
+  max-height: 210px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.trick-row {
+  max-width: 100%;
+  padding: 5px 10px;
+  border-radius: 10px;
+  background: rgba(15, 22, 34, 0.84);
+  border-right: 4px solid #facc15;
+  color: #fef08a;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-align: right;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.75);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.26);
+}
+
+.trick-row.trick-crash {
+  border-right-color: #ef4444;
+  color: #fecaca;
+}
+
+.trick-row.trick-combo {
+  border-right-color: #22d3ee;
+  color: #a5f3fc;
+}
+
+/* ============================================================================
+   Bottom-Left: Multi-Touch Steering Pads (#btn-steer-left, #btn-steer-right)
+   ============================================================================ */
+
+.hud-bottom-left {
+  position: fixed;
+  bottom: var(--inset-bottom);
+  left: var(--inset-left);
+  display: flex;
+  align-items: flex-end;
+  gap: var(--steer-gap);
+  pointer-events: none;
+}
+
+.pedal-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  border: 3px solid rgba(15, 23, 42, 0.92);
+  color: #ffffff;
+  font-weight: 900;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
+  box-shadow: 0 6px 0 rgba(10, 15, 26, 0.85), inset 0 3px 0 rgba(255, 255, 255, 0.36);
+  transition: transform 0.05s ease, box-shadow 0.05s ease;
+}
+
+.pedal-btn.is-pressed,
+.pedal-btn:active:not(.is-disabled) {
+  transform: translateY(4px) scale(0.96);
+  box-shadow: 0 2px 0 rgba(10, 15, 26, 0.85), inset 0 2px 0 rgba(255, 255, 255, 0.24);
+}
+
+.pedal-steer {
+  width: var(--steer-size);
+  height: var(--steer-size);
+  background: linear-gradient(180deg, rgba(51, 65, 85, 0.92) 0%, rgba(15, 23, 42, 0.94) 100%);
+  border-color: rgba(250, 204, 21, 0.72);
+}
+
+.pedal-steer.is-pressed {
+  background: linear-gradient(180deg, #facc15 0%, #d97706 100%);
+  color: #111827;
+  text-shadow: none;
+}
+
+.pedal-glyph {
+  font-size: 30px;
+  line-height: 1;
+}
+
+/* ============================================================================
+   Bottom-Center: Speedometer & Gear Dial (#hud-speed-value, #hud-gear-value)
+   ============================================================================ */
+
+.hud-speedo {
+  position: fixed;
+  bottom: var(--inset-bottom);
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--speedo-w);
+  height: var(--speedo-h);
+  padding: 6px 12px;
+  border-radius: 18px;
+  background: var(--hud-bg-strong);
+  border: 2.5px solid rgba(250, 204, 21, 0.72);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.34);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.speedo-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  line-height: 1;
+}
+
+.speedo-num {
+  font-size: 28px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+}
+
+.speedo-unit {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--hud-muted);
+}
+
+.speedo-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+.speedo-gear-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--hud-muted);
+}
+
+.speedo-gear-val {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--hud-hazard);
+  color: #111827;
+  font-size: 12px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================================
+   Bottom-Right: Action Row + Pedal Row
+   ============================================================================ */
+
+.hud-bottom-right {
+  position: fixed;
+  bottom: var(--inset-bottom);
+  right: var(--inset-right);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.hud-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--act-gap);
+  pointer-events: none;
+}
+
+.hud-btn-action {
+  width: var(--act-w);
+  height: var(--act-h);
+  min-width: 44px;
+  min-height: 44px;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px 2px;
+  border-radius: 13px;
+}
+
+.hud-btn-action .btn-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.hud-btn-action .btn-label {
+  font-size: 10.5px;
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+}
+
+.hud-btn-smash {
+  background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+  border-color: #7c2d12;
+  box-shadow: 0 4px 0 #7c2d12, inset 0 2px 0 rgba(255, 255, 255, 0.38);
+}
+
+.hud-btn-tnt {
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+  border-color: #450a0a;
+  box-shadow: 0 4px 0 #7f1d1d, inset 0 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+.hud-btn-fix {
+  background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+  border-color: #052e16;
+  box-shadow: 0 4px 0 #14532d, inset 0 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+.hud-btn-crush {
+  background: linear-gradient(180deg, #facc15 0%, #ca8a04 100%);
+  border-color: #713f12;
+  color: #111827;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+  box-shadow: 0 4px 0 #854d0e, inset 0 2px 0 rgba(255, 255, 255, 0.55);
+}
+
+.hud-btn-crush.is-ready {
+  outline: 3px solid #fef08a;
+  outline-offset: 1px;
+}
+
+.hud-pedal-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: var(--pedal-gap);
+  pointer-events: none;
+}
+
+.pedal-brake {
+  width: var(--brake-w);
+  height: var(--brake-h);
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+  border-color: #450a0a;
+  box-shadow: 0 6px 0 #7f1d1d, inset 0 3px 0 rgba(255, 255, 255, 0.35);
+}
+
+.pedal-gas {
+  width: var(--gas-w);
+  height: var(--gas-h);
+  background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+  border-color: #052e16;
+  box-shadow: 0 6px 0 #14532d, inset 0 3px 0 rgba(255, 255, 255, 0.42);
+}
+
+.pedal-boost {
+  width: var(--nos-w);
+  height: var(--nos-h);
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+  border-color: #082f49;
+  box-shadow: 0 6px 0 #075985, inset 0 3px 0 rgba(255, 255, 255, 0.42);
+}
+
+.pedal-title {
+  font-size: 16px;
+  line-height: 1.05;
+  letter-spacing: 0.03em;
+}
+
+.pedal-sub {
+  margin-top: 2px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  opacity: 0.88;
+}
+
+/* ============================================================================
+   Modals (#modal-garage & #modal-teleport) — Guardrail 4 Backdrop Margin
+   ============================================================================ */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(40px, env(safe-area-inset-top, 0px))
+           max(40px, env(safe-area-inset-right, 0px))
+           max(40px, env(safe-area-inset-bottom, 0px))
+           max(40px, env(safe-area-inset-left, 0px));
+  background: rgba(8, 13, 24, 0.68);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.modal-card {
+  width: min(680px, calc(100vw - 80px));
+  max-height: min(620px, calc(100dvh - 80px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #1b263b 0%, #0f172a 100%);
+  border: 3px solid var(--hud-hazard);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.58);
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.modal-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(10, 15, 26, 0.65);
+  border-bottom: 2px solid rgba(250, 204, 21, 0.35);
+}
+
+.modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  color: #ffffff;
+}
+
+.modal-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(74, 222, 128, 0.18);
+  border: 1.5px solid rgba(74, 222, 128, 0.6);
+  color: var(--cash-green);
+  font-size: 13px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.modal-close-btn {
+  width: 46px;
+  height: 46px;
+  min-width: 44px;
+  min-height: 44px;
+  flex: 0 0 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 2px solid #450a0a;
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+  box-shadow: 0 4px 0 #7f1d1d, inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.modal-close-btn.is-pressed,
+.modal-close-btn:active {
+  transform: translateY(3px) scale(0.96);
+  box-shadow: 0 1px 0 #7f1d1d;
+}
+
+/* Paint Swatch Bar (#garage-paint-row) */
+.paint-swatch-row {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 9px 14px;
+  background: rgba(15, 23, 42, 0.68);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.12);
+}
+
+.paint-swatch-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 3px solid rgba(255, 255, 255, 0.42);
+  background: var(--swatch-hex, #ef4444);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.08s ease, border-color 0.1s ease;
+}
+
+.paint-swatch-btn.is-selected {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 3px var(--hud-hazard), 0 4px 10px rgba(0, 0, 0, 0.45);
+  transform: scale(1.06);
+}
+
+.paint-swatch-btn.is-pressed {
+  transform: scale(0.94);
+}
+
+/* Teleport Category Tabs (#teleport-cat-tabs) */
+.zone-cat-tabs {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: rgba(15, 23, 42, 0.68);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.12);
+}
+
+.zone-cat-tab {
+  flex: 1 1 0;
+  min-height: 44px;
+  min-width: 84px;
+  padding: 6px 8px;
+  border-radius: 11px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: rgba(30, 41, 59, 0.9);
+  color: #cbd5e1;
+  font-size: 12.5px;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.zone-cat-tab.is-active {
+  background: linear-gradient(180deg, #facc15 0%, #eab308 100%);
+  border-color: #713f12;
+  color: #111827;
+  box-shadow: 0 3px 0 #854d0e;
+}
+
+/* Scrollable Inner Modal Body (ONLY element with touch-action: pan-y!) */
+.modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 14px;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Garage 12-Vehicle Grid (3x4 fits zero-scroll inside 472px body on all 5 iPad viewports) */
+.vehicle-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.vehicle-card {
+  min-height: 96px;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.96) 100%);
+  box-shadow: 0 4px 0 rgba(2, 6, 23, 0.72);
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+  text-align: left;
+  transition: transform 0.06s ease, border-color 0.1s ease;
+}
+
+.vehicle-card.is-active {
+  border-color: #4ade80;
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.45), 0 4px 0 #14532d;
+}
+
+.vehicle-card.is-pressed {
+  transform: translateY(3px) scale(0.98);
+}
+
+.vehicle-card-top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.vehicle-card-name {
+  font-size: 13.5px;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.vehicle-card-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1.5px solid rgba(255, 255, 255, 0.65);
+  background: var(--veh-color, #ef4444);
+  flex-shrink: 0;
+}
+
+.vehicle-card-specs {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--hud-muted);
+  line-height: 1.2;
+}
+
+.vehicle-card-foot {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.vehicle-card-cta {
+  padding: 3px 8px;
+  border-radius: 7px;
+  background: #16a34a;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.vehicle-card.is-locked .vehicle-card-cta {
+  background: #eab308;
+  color: #111827;
+}
+
+/* Teleport 14-Zone Grid (3x5 fits zero-scroll inside 472px body on all 5 iPad viewports) */
+.zone-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.zone-card {
+  min-height: 72px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  border-left: 5px solid var(--zone-accent, #facc15);
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.96) 100%);
+  box-shadow: 0 4px 0 rgba(2, 6, 23, 0.7);
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+  text-align: left;
+  transition: transform 0.06s ease, border-color 0.1s ease;
+}
+
+.zone-card.is-active {
+  border-color: var(--hud-hazard);
+  border-left-color: var(--zone-accent, #facc15);
+}
+
+.zone-card.is-pressed {
+  transform: translateY(3px) scale(0.98);
+}
+
+.zone-card-name {
+  font-size: 12.5px;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.zone-card-desc {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--hud-muted);
+  line-height: 1.2;
+}
+
+/* ============================================================================
+   WebGL Fallback Notice (#webgl-fallback)
+   ============================================================================ */
+
+.webgl-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.94);
+  pointer-events: auto;
+}
+
+.webgl-fallback-card {
+  max-width: 440px;
+  padding: 22px 24px;
+  border-radius: 18px;
+  background: #1e293b;
+  border: 3px solid #ef4444;
+  text-align: center;
+}
+
+.webgl-fallback-card h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: #fecaca;
+}
+
+.webgl-fallback-card p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #e2e8f0;
+}
+
+/* ============================================================================
+   Breakpoint 1: Compact Landscape — iPad Classic Landscape (1024x768)
+   ============================================================================ */
+
+@media (max-width: 1099px) and (min-width: 901px) {
+  :root {
+    --feed-w: 224px;
+    --speedo-w: 156px;
+    --speedo-h: 72px;
+    --act-w: 70px;
+    --act-h: 50px;
+    --act-gap: 6px;
+    --brake-w: 72px;
+    --brake-h: 74px;
+    --gas-w: 80px;
+    --gas-h: 78px;
+    --nos-w: 72px;
+    --nos-h: 74px;
+  }
+
+  .speedo-num {
+    font-size: 26px;
+  }
+}
+
+/* ============================================================================
+   Breakpoint 2: iPad Portrait (820x1180 & 768x1024)
+   ============================================================================ */
+
+@media (max-width: 900px) {
+  :root {
+    --tl-w: 214px;
+    --tr-w: 220px;
+    --nav-btn-w: 103px;
+    --nav-btn-h: 46px;
+    --cam-btn-w: 76px;
+    --eject-btn-w: 86px;
+    --audio-btn-w: 46px;
+    --util-btn-h: 46px;
+    --alert-max-w: min(276px, calc(100vw - 476px));
+    --feed-w: 166px;
+    --steer-size: 72px;
+    --steer-gap: 10px;
+    --speedo-w: 136px;
+    --speedo-h: 68px;
+    --act-w: 66px;
+    --act-h: 50px;
+    --act-gap: 6px;
+    --brake-w: 68px;
+    --brake-h: 70px;
+    --gas-w: 76px;
+    --gas-h: 74px;
+    --nos-w: 68px;
+    --nos-h: 70px;
+    --pedal-gap: 8px;
+  }
+
+  .hud-status-card {
+    padding: 7px 9px;
+  }
+
+  .hud-leaderboard {
+    padding: 6px 9px;
+  }
+
+  .hud-alert {
+    font-size: 12.5px;
+    padding: 7px 12px;
+  }
+
+  .hud-trick-feed {
+    max-height: 210px;
+  }
+
+  .trick-row {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .speedo-num {
+    font-size: 24px;
+  }
+
+  .pedal-glyph {
+    font-size: 27px;
+  }
+
+  .pedal-title {
+    font-size: 14.5px;
+  }
+
+  .hud-btn-action .btn-icon {
+    font-size: 17px;
+  }
+
+  .hud-btn-action .btn-label {
+    font-size: 10px;
+  }
+}
+
+/* ============================================================================
+   Defensive Fallback: Narrow Split-View (< 720px, outside 5 iPad viewports)
+   ============================================================================ */
+
+@media (max-width: 720px) {
+  .vehicle-grid,
+  .zone-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .zone-cat-tabs {
+    flex-wrap: wrap;
+  }
+}

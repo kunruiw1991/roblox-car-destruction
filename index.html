@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#38a6ff" />
+    <title>Roblox Realistic Car Destruction 3D — iPad Edition</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23162235'/%3E%3Cpath d='M0 54 L64 54 L64 64 L0 64 Z' fill='%23facc15'/%3E%3Cpath d='M6 54 L14 64 M22 54 L30 64 M38 54 L46 64 M54 54 L62 64' stroke='%23111827' stroke-width='5'/%3E%3Cpolygon points='48,6 52,14 60,12 55,19 61,25 52,25 50,33 45,25 37,26 42,19 38,12 46,14' fill='%23facc15' stroke='%23ef4444' stroke-width='2'/%3E%3Crect x='14' y='19' width='26' height='12' rx='3' fill='%2393c5fd' stroke='%23991b1b' stroke-width='2.5'/%3E%3Crect x='8' y='28' width='42' height='16' rx='4' fill='%23ef4444' stroke='%237f1d1d' stroke-width='2.5'/%3E%3Crect x='11' y='32' width='6' height='5' rx='1' fill='%23fef08a'/%3E%3Crect x='41' y='32' width='6' height='5' rx='1' fill='%23fef08a'/%3E%3Ccircle cx='18' cy='46' r='6.5' fill='%231f2937' stroke='%23e5e7eb' stroke-width='2.5'/%3E%3Ccircle cx='40' cy='46' r='6.5' fill='%231f2937' stroke='%23e5e7eb' stroke-width='2.5'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body>
+    <div id="app" class="app-root">
+      <canvas id="game-canvas" aria-label="Roblox Realistic Car Destruction 3D World"></canvas>
+
+      <div id="ui-layer" class="ui-layer">
+        <!-- Title Start Overlay (visible on boot; hidden by src/main.js when PLAY! is tapped) -->
+        <div id="start-overlay" class="start-overlay" data-testid="start-overlay">
+          <div class="start-hero-card">
+            <div class="start-kicker">ROBLOX 3D SANDBOX &bull; DEMOLITION LAB</div>
+            <h1 class="start-title">REALISTIC CAR DESTRUCTION</h1>
+            <div class="start-badges" aria-label="Game highlights">
+              <span class="start-badge">&#128663; 12 Vehicles</span>
+              <span class="start-badge">&#127959; 14 Crushers &amp; Stunts</span>
+              <span class="start-badge">&#129512; TNT &amp; Ragdoll</span>
+              <span class="start-badge">&#128241; iPad Touch</span>
+            </div>
+          </div>
+
+          <div class="start-cta-wrap">
+            <button
+              id="btn-play"
+              type="button"
+              class="btn-play-cta"
+              data-testid="btn-play"
+              aria-label="Play Roblox Realistic Car Destruction"
+            >
+              <span class="play-tri" aria-hidden="true">&#9654;</span>
+              <span class="play-text">PLAY!</span>
+            </button>
+            <div class="start-hint">Hold STEER + GAS, drag sky to orbit, or tap &#128640; SMASH!</div>
+          </div>
+        </div>
+
+        <!-- Active Gameplay HUD (hidden until PLAY! tapped; all Contract #14 IDs mounted at boot) -->
+        <div id="hud-root" class="hud-root" hidden>
+          <!-- Top-Left: Integrity, Nitro, Cash/Parts/Level & Quick Garage/Warp Buttons -->
+          <div class="hud-cluster hud-top-left">
+            <div class="hud-status-card" aria-label="Vehicle status and score">
+              <div class="hud-stat-row">
+                <span id="hud-cash" class="stat-cash" data-testid="hud-cash">$1,500</span>
+                <span class="stat-parts-wrap" aria-label="Destroyed parts">
+                  <span class="stat-ico" aria-hidden="true">&#128297;</span>
+                  <span id="hud-parts" class="stat-parts" data-testid="hud-parts">0/12</span>
+                </span>
+                <span id="hud-level" class="stat-level" data-testid="hud-level">LVL 1</span>
+              </div>
+
+              <div class="hud-meter-row">
+                <span class="meter-tag">HP</span>
+                <div class="meter-track meter-track-integrity">
+                  <div
+                    id="hud-integrity-bar"
+                    class="meter-fill meter-fill-integrity"
+                    data-testid="hud-integrity-bar"
+                    role="progressbar"
+                    aria-label="Vehicle integrity"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="100"
+                    style="width: 100%"
+                  ></div>
+                </div>
+                <span id="hud-integrity-value" class="meter-val" data-testid="hud-integrity-value">100%</span>
+              </div>
+
+              <div class="hud-meter-row">
+                <span class="meter-tag meter-tag-nos">NOS</span>
+                <div class="meter-track meter-track-nitro">
+                  <div
+                    id="hud-nitro-bar"
+                    class="meter-fill meter-fill-nitro"
+                    data-testid="hud-nitro-bar"
+                    role="progressbar"
+                    aria-label="Nitro boost"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    aria-valuenow="100"
+                    style="width: 100%"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hud-nav-row">
+              <button
+                id="btn-garage"
+                type="button"
+                class="hud-btn hud-btn-nav hud-btn-garage"
+                data-testid="btn-garage"
+                aria-label="Open Cars Garage"
+              >
+                <span class="btn-icon" aria-hidden="true">&#128663;</span>
+                <span class="btn-label">CARS</span>
+              </button>
+              <button
+                id="btn-teleport"
+                type="button"
+                class="hud-btn hud-btn-nav hud-btn-teleport"
+                data-testid="btn-teleport"
+                aria-label="Open Teleport Map"
+              >
+                <span class="btn-icon" aria-hidden="true">&#128506;</span>
+                <span class="btn-label">WARP</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Top-Center: Dynamic Alert Banner (Press Closing / Car On Fire / WRECKED!) -->
+          <div
+            id="hud-alert"
+            class="hud-alert"
+            data-testid="hud-alert"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></div>
+
+          <!-- Top-Right: Classic Roblox Leaderboard + Utility Buttons -->
+          <div class="hud-cluster hud-top-right">
+            <div id="hud-leaderboard" class="hud-leaderboard" data-testid="hud-leaderboard" aria-label="Leaderboard">
+              <div class="lb-head">
+                <span class="lb-col-player">PLAYERS</span>
+                <span class="lb-col-cash">CASH</span>
+              </div>
+              <div class="lb-row lb-row-self">
+                <span class="lb-player">
+                  <span class="lb-dot lb-dot-jj" aria-hidden="true"></span>
+                  <span class="lb-name">JJ</span>
+                </span>
+                <span id="hud-lb-jj" class="lb-cash">$1,500</span>
+              </div>
+              <div class="lb-row">
+                <span class="lb-player">
+                  <span class="lb-dot lb-dot-mikey" aria-hidden="true"></span>
+                  <span class="lb-name">Mikey_Turtle</span>
+                </span>
+                <span id="hud-lb-mikey" class="lb-cash">$1,250</span>
+              </div>
+            </div>
+
+            <div class="hud-util-row">
+              <button
+                id="btn-camera"
+                type="button"
+                class="hud-btn hud-btn-util hud-btn-cam"
+                data-testid="btn-camera"
+                aria-label="Switch Camera Mode"
+              >
+                <span class="btn-icon" aria-hidden="true">&#128247;</span>
+                <span class="btn-label">CAM</span>
+              </button>
+              <button
+                id="btn-ragdoll"
+                type="button"
+                class="hud-btn hud-btn-util hud-btn-eject"
+                data-testid="btn-ragdoll"
+                aria-label="Eject Ragdoll"
+              >
+                <span class="btn-icon" aria-hidden="true">&#129336;</span>
+                <span class="btn-label">EJECT</span>
+              </button>
+              <button
+                id="btn-audio"
+                type="button"
+                class="hud-btn hud-btn-util hud-btn-audio"
+                data-testid="btn-audio"
+                aria-label="Toggle Sound"
+              >
+                <span class="btn-icon" aria-hidden="true">&#128266;</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right-Side Floating Stunt & Crash Combo Scorecard (max 4 visible .trick-row items) -->
+          <div
+            id="hud-trick-feed"
+            class="hud-trick-feed"
+            data-testid="hud-trick-feed"
+            aria-live="polite"
+          ></div>
+
+          <!-- Bottom-Left: Left-Thumb Steering Pads -->
+          <div class="hud-cluster hud-bottom-left" aria-label="Steering controls">
+            <button
+              id="btn-steer-left"
+              type="button"
+              class="pedal-btn pedal-steer"
+              data-testid="btn-steer-left"
+              aria-label="Steer Left"
+            >
+              <span class="pedal-glyph" aria-hidden="true">&#9664;</span>
+            </button>
+            <button
+              id="btn-steer-right"
+              type="button"
+              class="pedal-btn pedal-steer"
+              data-testid="btn-steer-right"
+              aria-label="Steer Right"
+            >
+              <span class="pedal-glyph" aria-hidden="true">&#9654;</span>
+            </button>
+          </div>
+
+          <!-- Bottom-Center: Compact Roblox Digital Speedometer & Gear Dial -->
+          <div class="hud-speedo" aria-label="Speedometer">
+            <div class="speedo-main">
+              <span id="hud-speed-value" class="speedo-num" data-testid="hud-speed-value">0</span>
+              <span class="speedo-unit">km/h</span>
+            </div>
+            <div class="speedo-meta">
+              <span class="speedo-gear-tag">GEAR</span>
+              <span id="hud-gear-value" class="speedo-gear-val" data-testid="hud-gear-value">D1</span>
+            </div>
+          </div>
+
+          <!-- Bottom-Right: Kid-Friendly Destruction Actions + Driving Pedals -->
+          <div class="hud-cluster hud-bottom-right">
+            <div class="hud-action-row" aria-label="Destruction actions">
+              <button
+                id="btn-auto-smash"
+                type="button"
+                class="hud-btn hud-btn-action hud-btn-smash"
+                data-testid="btn-auto-smash"
+                aria-label="Auto Smash Launch"
+              >
+                <span class="btn-icon" aria-hidden="true">&#128640;</span>
+                <span class="btn-label">SMASH</span>
+              </button>
+              <button
+                id="btn-tnt"
+                type="button"
+                class="hud-btn hud-btn-action hud-btn-tnt"
+                data-testid="btn-tnt"
+                aria-label="Throw Dynamite TNT"
+              >
+                <span class="btn-icon" aria-hidden="true">&#129512;</span>
+                <span class="btn-label">TNT</span>
+              </button>
+              <button
+                id="btn-repair"
+                type="button"
+                class="hud-btn hud-btn-action hud-btn-fix"
+                data-testid="btn-repair"
+                aria-label="Repair and Reset Vehicle"
+              >
+                <span class="btn-icon" aria-hidden="true">&#128295;</span>
+                <span class="btn-label">FIX</span>
+              </button>
+              <button
+                id="btn-machine-trigger"
+                type="button"
+                class="hud-btn hud-btn-action hud-btn-crush"
+                data-testid="btn-machine-trigger"
+                aria-label="Trigger Crusher Machine"
+              >
+                <span class="btn-icon" aria-hidden="true">&#9889;</span>
+                <span class="btn-label">CRUSH</span>
+              </button>
+            </div>
+
+            <div class="hud-pedal-row" aria-label="Driving pedals">
+              <button
+                id="btn-brake"
+                type="button"
+                class="pedal-btn pedal-brake"
+                data-testid="btn-brake"
+                aria-label="Brake or Reverse"
+              >
+                <span class="pedal-title">REV</span>
+                <span class="pedal-sub">BRAKE</span>
+              </button>
+              <button
+                id="btn-gas"
+                type="button"
+                class="pedal-btn pedal-gas"
+                data-testid="btn-gas"
+                aria-label="Gas Accelerate"
+              >
+                <span class="pedal-title">GAS</span>
+                <span class="pedal-sub">DRIVE</span>
+              </button>
+              <button
+                id="btn-boost"
+                type="button"
+                class="pedal-btn pedal-boost"
+                data-testid="btn-boost"
+                aria-label="Nitro Boost"
+              >
+                <span class="pedal-title">&#9889;NOS</span>
+                <span class="pedal-sub">BOOST</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Garage Modal (450 ms backdrop dismiss guard wired by M3 src/ui/garage_modal.js) -->
+        <div
+          id="modal-garage"
+          class="modal-backdrop"
+          data-testid="modal-garage"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-garage-title"
+          hidden
+        >
+          <div class="modal-card modal-card-garage">
+            <div class="modal-header">
+              <div class="modal-title-group">
+                <h2 id="modal-garage-title" class="modal-title">&#128663; CARS / GARAGE</h2>
+                <span id="garage-cash-badge" class="modal-pill">$1,500</span>
+              </div>
+              <button
+                id="btn-garage-close"
+                type="button"
+                class="modal-close-btn"
+                data-testid="btn-garage-close"
+                aria-label="Close Garage"
+              >
+                <span class="btn-icon" aria-hidden="true">&#10005;</span>
+              </button>
+            </div>
+
+            <div id="garage-paint-row" class="paint-swatch-row" aria-label="Vehicle paint color">
+              <!-- M3 renders 9 [data-paint-id="<id>"] .paint-swatch-btn buttons here -->
+            </div>
+
+            <div class="modal-body">
+              <div id="garage-vehicle-grid" class="vehicle-grid" aria-label="Vehicle selection">
+                <!-- M3 renders 12 [data-vehicle-id="<id>"] .vehicle-card buttons here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Teleport To Modal (450 ms backdrop dismiss guard wired by M3 src/ui/teleport_modal.js) -->
+        <div
+          id="modal-teleport"
+          class="modal-backdrop"
+          data-testid="modal-teleport"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-teleport-title"
+          hidden
+        >
+          <div class="modal-card modal-card-teleport">
+            <div class="modal-header">
+              <div class="modal-title-group">
+                <h2 id="modal-teleport-title" class="modal-title">&#128506; TELEPORT TO</h2>
+                <span id="teleport-zone-badge" class="modal-pill">14 ZONES</span>
+              </div>
+              <button
+                id="btn-teleport-close"
+                type="button"
+                class="modal-close-btn"
+                data-testid="btn-teleport-close"
+                aria-label="Close Teleport Map"
+              >
+                <span class="btn-icon" aria-hidden="true">&#10005;</span>
+              </button>
+            </div>
+
+            <div id="teleport-cat-tabs" class="zone-cat-tabs" role="tablist" aria-label="Zone categories">
+              <!-- M3 renders [data-zone-cat="<cat>"] .zone-cat-tab buttons here -->
+            </div>
+
+            <div class="modal-body">
+              <div id="teleport-zone-grid" class="zone-grid" aria-label="Destruction zones">
+                <!-- M3 renders [data-zone-id="<id>"] .zone-card buttons here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WebGL Unavailable Fallback Notice (hidden unless WebGL2/WebGL context fails) -->
+        <div id="webgl-fallback" class="webgl-fallback" role="alert" hidden>
+          <div class="webgl-fallback-card">
+            <h2>3D Graphics Unavailable</h2>
+            <p>
+              WebGL could not start in this browser tab. Please reload or enable WebGL / Hardware
+              Acceleration in Safari settings to play Realistic Car Destruction 3D.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
